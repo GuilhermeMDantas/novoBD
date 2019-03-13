@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const servidorSchema = mongoose.Schema({
     nome:{
         required:true,
-        type: String
+        type: String,
+        trim: true
     },
     cpf:{
         required:true,
