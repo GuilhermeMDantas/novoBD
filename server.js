@@ -92,7 +92,7 @@ app.use(cookieParser());
                 if(err) return res.status(400).send(err);
 
                 // Não encontrou
-                if(doc === null) return res.status(204).json({erro:"Nenhum documento encontrado"})
+                if(doc === null) return res.json({erro:"Nenhum documento encontrado"})
 
                 return res.status(200).send(doc);
             })
@@ -105,7 +105,7 @@ app.use(cookieParser());
                 if(err) return res.status(400).send(err);
 
                 // Não encontrou
-                if(doc === null) return res.status(204).json({erro:"Nenhum documento encontrado"})
+                if(doc === null) return res.json({erro:"Nenhum documento encontrado"})
                 
                 return res.status(200).send(doc);
             })
@@ -117,7 +117,7 @@ app.use(cookieParser());
                 if(err) return res.status(400).send(err);
                 
                 // Não encontrou
-                if(doc === null) return res.status(204).json({erro:"Nenhum documento encontrado"})
+                if(doc === null) return res.json({erro:"Nenhum documento encontrado"})
 
                 return res.status(200).send(doc)
             })
@@ -317,7 +317,25 @@ app.use(cookieParser());
 }
 
 // UPDATE //
+// Encapsulamento pra poder minimizar as apis
+{
+    app.patch('/api/update/servidor', (req,res)=>{
+        // Oq vai ser atualizado e com oq
+        let updateQuery = req.body.updateQuery;
 
+        // Parametros que podem ser nome, cpf ou rg do servidor (apenas 1)
+        let servidor = req.body.servidor;
+        
+        // Procura o servidor com os parametros
+        Servidor.findOneAndUpdate({$or:[{nome: {$regex: servidor}},{cpf: servidor},{rg: servidor}]}, updateQuery, {new:true}, (err,doc)=>{
+                if(err) return res.status(400).send(err);
+
+                if(doc == null) return res.json({error:'Nenhum servidor foi encontrado'});
+
+                res.status(200).json(doc);
+            })
+    })
+}
 
 // DELETE //
 
