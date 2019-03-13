@@ -319,6 +319,7 @@ app.use(cookieParser());
 // UPDATE //
 // Encapsulamento pra poder minimizar as apis
 {
+    // Basicamente igual ao código de delete, porém atualiza invés de deletar
     app.patch('/api/update/servidor', (req,res)=>{
         // Oq vai ser atualizado e com oq
         let updateQuery = req.body.updateQuery;
@@ -328,16 +329,32 @@ app.use(cookieParser());
         
         // Procura o servidor com os parametros
         Servidor.findOneAndUpdate({$or:[{nome: {$regex: servidor}},{cpf: servidor},{rg: servidor}]}, updateQuery, {new:true}, (err,doc)=>{
-                if(err) return res.status(400).send(err);
+            if(err) return res.status(400).send(err);
 
-                if(doc == null) return res.json({error:'Nenhum servidor foi encontrado'});
+            if(doc == null) return res.json({error:`Nenhum servidor com o parametro '${servidor}' foi encontrado`});
 
-                res.status(200).json(doc);
-            })
+            res.status(200).json({deleted:true, doc});
+        })
     })
 }
 
 // DELETE //
+{
+    // Basicamente igual ao código de update, porém deleta invés de atualizar
+    app.delete('/api/delete/servidor', (req,res)=>{
+        // Parametros que podem ser nome, cpf ou rg do servidor (apenas 1)
+        let servidor = req.body.servidor;
+
+        // Procura o servidor com os parametros
+        Servidor.findOneAndDelete({$or:[{nome: {$regex: servidor}},{cpf: servidor},{rg: servidor}]}, {projection:{nome:1, _id:0}}, (err,doc)=>{
+            if(err) return res.status(400).send(err);
+
+            if(doc == null) return res.json({error:`Nenhum servidor com o parametro '${servidor}' foi encontrado`});
+
+            res.status(200).json(doc);
+        })
+    })
+}
 
 // START //
 const port = process.env.PORT || 3000;
