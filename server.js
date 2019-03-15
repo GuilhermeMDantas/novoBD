@@ -36,43 +36,82 @@ app.use(cookieParser());
 // GET //
 // Encapsulamento pra poder minimizar as apis
 {
-    // Lista todos os campos vazios em servidores
+    // Lista todos os campos vazios na colletion
     app.get('/api/servidores/count/empty', (req,res)=>{
-        // Todos os campos vazios
-        Servidor.countDocuments({$or: [{nome: 'None'}, {cpf: '0'}, {rg: '0'}]}, (err,count)=>{
-            if(err) return res.status(400).send(err);        
-
-            // Todos os nomes
-            Servidor.countDocuments({nome:'None'}, (err,nome)=>{
+        // Nomes vazios
+        Servidor.countDocuments({nome: null}, (err,nomes)=>{
+            if(err) return res.status(400).send(err);
+            
+            // RFs vazios
+            Servidor.countDocuments({registro:null}, (err,registros)=>{
                 if(err) return res.status(400).send(err);
                 
-                // Todos os CPFs
-                Servidor.countDocuments({cpf:'0'}, (err,cpf)=>{
+                // CPFs vazios
+                Servidor.countDocuments({cpf:null}, (err,cpfs)=>{
                     if(err) return res.status(400).send(err);
                     
-                    // Todos os RGs
-                    Servidor.countDocuments({rg:'0'}, (err,rg)=>{
+                    // RGs vazios
+                    Servidor.countDocuments({rg:null}, (err,rgs)=>{
                         if(err) return res.status(400).send(err);
-
-                        res.status(200).json({
-                            total:"Total number of entries without fields",
-                            count: count,
-                            totalNomes:"Total number of entries without names",
-                            countNomes: nome,
-                            totalCPFs:"Total number of entries without cpfs",
-                            countCPFs: cpf,
-                            totalRGs:"Total number of entries without RGs",
-                            countRGs: rg
+                        
+                        // Endereços vazios
+                        Servidor.countDocuments({enderecos:null}, (err,enderecos)=>{
+                            if(err) return res.status(400).send(err);
+                            
+                            // Sexos vazios
+                            Servidor.countDocuments({genero:null}, (err,generos)=>{
+                                if(err) return res.status(400).send(err);
+                                
+                                // Data de Nascimento vazias
+                                Servidor.countDocuments({nascimento:null}, (err,nascimentos)=>{
+                                    if(err) return res.status(400).send(err);
+                                    
+                                    // Naturalidade vazia
+                                    Servidor.countDocuments({naturalidade:null}, (err,naturalidades)=>{
+                                        if(err) return res.status(400).send(err);
+                                        
+                                        // Formações vazias
+                                        Servidor.countDocuments({formacao:null}, (err,formacoes)=>{
+                                            if(err) return res.status(400).send(err);
+                                            
+                                            // Estado Civis vazios
+                                            Servidor.countDocuments({estadocivil:null}, (err,estadocivis)=>{
+                                                if(err) return res.status(400).send(err);
+                                                
+                                                // Escolaridades vazias
+                                                Servidor.countDocuments({escolaridade:null}, (err,escolaridades)=>{
+                                                    if(err) return res.status(400).send(err);
+                                                    
+                                                    res.json({
+                                                        mensagem:'Número de campos vazios em TBL_DADOSPESSOAIS',
+                                                        nomes:nomes,
+                                                        registros:registros,
+                                                        cpfs:cpfs,
+                                                        rgs:rgs,
+                                                        enderecos:enderecos,
+                                                        generos:generos,
+                                                        dataDeNascimentos:nascimentos,
+                                                        naturalidades:naturalidades,
+                                                        formacoes:formacoes,
+                                                        estadocivis:estadocivis,
+                                                        escolaridades:escolaridades
+                                                    })
+                                                })
+                                            })
+                                        })
+                                    })
+                                })
+                            })
                         })
                     })
-                })                    
+                })  
             })
         })
     })
 
     // Usa QueryStrings pra procurar servidores
     app.get('/api/servidores/find', (req,res)=>{
-        // Se req.query.X != null
+        // if (req.query.X != null) -- in other words if (req.query.X == true) => exists
         // Y = req.query.X
         // else
         // Y = unsp
@@ -80,19 +119,20 @@ app.use(cookieParser());
         let nome    = req.query.nome ? req.query.nome : unsp;
         let cpf     = req.query.cpf ? req.query.cpf : unsp;
         let rg      = req.query.rg ? req.query.rg : unsp;
+        let regex   = new RegExp('^' + nome, "i");   // Adiciona automaticamente / no começo e fim || Ignore case
 
         // Se nenhum informado
         if (nome === unsp && cpf === unsp && rg === unsp) return res.status(400).json({erro:"Nenhum valor foi específicado"});
 
-        // nome informado
+        // Nome informado
         if(nome !== unsp) {
 
-            // Procura por todos os matchs do nome
-            Servidor.find({nome: {$regex: nome}}, (err,doc)=>{
-                if(err) return res.status(400).send(err);
+            // Procura por todos os nomes que começam com ${nome}
+            Servidor.find({nome: {$regex: regex}}, (err,doc)=>{
+                if(err) return res.status(400).json(err);
 
-                // Não encontrou
-                if(doc === null) return res.json({erro:"Nenhum documento encontrado"})
+                // Não encontrou nada
+                if(doc == false) return res.json({erro:"Nenhum documento encontrado"})
 
                 return res.status(200).send(doc);
             })
@@ -105,7 +145,7 @@ app.use(cookieParser());
                 if(err) return res.status(400).send(err);
 
                 // Não encontrou
-                if(doc === null) return res.json({erro:"Nenhum documento encontrado"})
+                if(doc == false) return res.json({erro:"Nenhum documento encontrado"})
                 
                 return res.status(200).send(doc);
             })
@@ -117,13 +157,20 @@ app.use(cookieParser());
                 if(err) return res.status(400).send(err);
                 
                 // Não encontrou
-                if(doc === null) return res.json({erro:"Nenhum documento encontrado"})
+                if(doc == false) return res.json({erro:"Nenhum documento encontrado"})
 
                 return res.status(200).send(doc)
             })
         }
 
 
+    })
+
+    app.get('/api/servidores/relatorios/formados', (req,res)=>{
+        Servidor.find({formacao: {$ne: null}}, {_id:0, rf:1, nome:1, formacao:1}, (err,doc)=>{
+            if(err) return res.status(400).send(err);
+            res.json(doc);
+        })
     })
 
     // Simplesmente lista os cargos na db
@@ -195,8 +242,25 @@ app.use(cookieParser());
 // POST //
 // Encapsulamento pra poder minimizar as apis
 {
-    app.post('/api/populate/funcionarios', (req,res)=>{
+    app.post('/api/populate/servidor', async (req,res)=>{
         let funcionario = new Servidor(req.body);
+
+        // Procura pela string do Estado e troca o ID pelo Nome
+        if(funcionario.estado != null) {
+            let estado = await EstadoCivil.findById(funcionario.estadocivil, {_id:0, estado:1});
+            funcionario.estadocivil = estado.estado;
+
+
+        // Procura pela string da Formação e troca o ID pelo Nome
+        if(funcionario.escolaridade != null) {
+            let escolaridade = await Escolaridade.findById(funcionario.escolaridade, {_id:0, escolaridade:1});
+            funcionario.escolaridade = escolaridade.escolaridade;
+        }
+        // Procura pela string da Escolaridade e troca o ID pelo Nome
+        if(funcionario.formacao != null) {
+            let formacao = await Formacao.findById(funcionario.formacao, {_id:0, formacao:1});
+            funcionario.formacao = formacao.formacao;
+        }
 
         funcionario.save((err,doc)=>{
             if(err) return res.status(400).send(err);
@@ -336,9 +400,11 @@ app.use(cookieParser());
             res.status(200).json({deleted:true, doc});
         })
     })
+
 }
 
 // DELETE //
+// Encapsulamento pra poder minimizar as apis
 {
     // Basicamente igual ao código de update, porém deleta invés de atualizar
     app.delete('/api/delete/servidor', (req,res)=>{

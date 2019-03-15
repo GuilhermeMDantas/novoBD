@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 // SCHEMA //
 const escolaridadeSchema = mongoose.Schema({
+    _id:String,
     escolaridade:{
         required:true,
         unique:true,

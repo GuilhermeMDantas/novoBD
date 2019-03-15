@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 // SCHEMA //
 const formacoesSchema = mongoose.Schema({
+    _id:String,
     formacao:{
         required:true,
         unique:true,

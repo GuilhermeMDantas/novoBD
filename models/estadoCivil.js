@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 // SCHEMA //
 const estadoSchema = mongoose.Schema({
+    _id:String,
     estado:{
         required:true,
         unique:true,
